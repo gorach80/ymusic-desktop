@@ -54,6 +54,38 @@ fn save_config(app_handle: tauri::AppHandle, new_config: UserConfig) -> Result<(
     Err("Failed to save config".to_string())
 }
 
+#[tauri::command]
+fn get_api_key(app_handle: tauri::AppHandle) -> Result<String, String> {
+    // Look for .env file in resource directory or current directory
+    let env_path = app_handle.path_resolver().resource_dir()
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join(".env");
+    
+    let paths = vec![
+        std::path::PathBuf::from(".env"),
+        env_path,
+    ];
+    
+    for path in paths {
+        if path.exists() {
+            if let Ok(content) = std::fs::read_to_string(path) {
+                for line in content.lines() {
+                    if line.starts_with("GEMINI_API_KEY=") {
+                        return Ok(line.replace("GEMINI_API_KEY=", "").trim().to_string());
+                    }
+                }
+            }
+        }
+    }
+    
+    // Check environment variables
+    if let Ok(key) = std::env::var("GEMINI_API_KEY") {
+        return Ok(key);
+    }
+    
+    Err("Gemini API Key not found".to_string())
+}
+
 fn setup_shortcuts(app: &mut tauri::App) {
     let app_handle = app.handle();
     let mut shortcut_manager = app.global_shortcut_manager();
@@ -87,7 +119,7 @@ fn main() {
             setup_shortcuts(app);
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_config, save_config])
+        .invoke_handler(tauri::generate_handler![get_config, save_config, get_api_key])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

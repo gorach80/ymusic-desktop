@@ -1,6 +1,7 @@
 import { getConfig, saveConfig } from "./services/config";
 import { listen } from "@tauri-apps/api/event";
 import { searchTracks, Track } from "./services/music";
+import { getSemanticQuery } from "./services/gemini";
 
 // Native HTML5 Audio
 const audio = new Audio();
@@ -26,6 +27,7 @@ const progressBar = document.getElementById("progressBar") as HTMLInputElement;
 const volumeSlider = document.getElementById("volumeSlider") as HTMLInputElement;
 const currentTimeLabel = document.getElementById("currentTime") as HTMLSpanElement;
 const totalDurationLabel = document.getElementById("totalDuration") as HTMLSpanElement;
+const resultsTitle = document.querySelector(".section-title") as HTMLHeadingElement;
 
 const queueList = document.getElementById("queueList") as HTMLDivElement;
 const lyricsView = document.getElementById("lyricsView") as HTMLDivElement;
@@ -303,18 +305,33 @@ progressBar.addEventListener("change", () => {
   }
 });
 
-// Search trigger on Enter
+// Search trigger on Enter with Gemini Semantic Intelligence
 searchInput.addEventListener("keydown", async (e) => {
   if (e.key === "Enter") {
     const query = searchInput.value.trim();
     if (query) {
       searchInput.disabled = true;
-      searchInput.placeholder = "Buscando canciones...";
+      searchInput.placeholder = "Consultando a Gemini...";
       try {
-        const results = await searchTracks(query);
-        renderResults(results);
+        // 1. Get structured semantic search params from Google AI Studio (Gemini)
+        const semantic = await getSemanticQuery(query);
+        
+        if (semantic) {
+          console.log(`[Gemini AI] Búsqueda optimizada: "${semantic.searchQuery}" (Clima: ${semantic.detectedMood} | Géneros: ${semantic.genres.join(", ")})`);
+          resultsTitle.textContent = `Resultados de Búsqueda (Clima: ${semantic.detectedMood} | Géneros: ${semantic.genres.join(", ")})`;
+          
+          // 2. Fetch actual tracks from Deezer
+          searchInput.placeholder = "Buscando canciones...";
+          const results = await searchTracks(semantic.searchQuery);
+          renderResults(results);
+        } else {
+          // Fallback directly to normal search
+          resultsTitle.textContent = "Resultados de Búsqueda";
+          const results = await searchTracks(query);
+          renderResults(results);
+        }
       } catch (err) {
-        console.error("Error al buscar canciones:", err);
+        console.error("Error en flujo de búsqueda semántica:", err);
       } finally {
         searchInput.disabled = false;
         searchInput.placeholder = "Buscar canciones, artistas, álbumes...";
