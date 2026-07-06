@@ -1,10 +1,25 @@
 import { getConfig, saveConfig } from "./services/config";
 import { listen } from "@tauri-apps/api/event";
+import { searchTracks, Track } from "./services/music";
 
 const audio = new Audio();
 const playBtn = document.getElementById("playBtn") as HTMLButtonElement;
 const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
 const volumeSlider = document.getElementById("volumeSlider") as HTMLInputElement;
+const trackTitle = document.getElementById("trackTitle") as HTMLHeadingElement;
+const trackArtist = document.getElementById("trackArtist") as HTMLParagraphElement;
+
+let currentTrack: Track | null = null;
+
+export async function playTrack(track: Track) {
+  currentTrack = track;
+  audio.src = track.url;
+  trackTitle.textContent = track.title;
+  trackArtist.textContent = track.artist;
+  
+  audio.play().catch(console.error);
+  playBtn.textContent = "Pausar";
+}
 
 async function initPlayer() {
   const config = await getConfig();
@@ -62,3 +77,16 @@ try {
 } catch (error) {
   console.warn("No se pudieron registrar los oyentes de eventos de Tauri:", error);
 }
+
+// Expose global search helper for dev testing
+(window as any).performSearch = async (query: string) => {
+  console.log(`Buscando en Deezer: ${query}`);
+  const results = await searchTracks(query);
+  console.log("Resultados de búsqueda:", results);
+  if (results.length > 0) {
+    console.log(`Reproduciendo primer resultado: ${results[0].title} - ${results[0].artist}`);
+    playTrack(results[0]);
+  } else {
+    console.warn("No se obtuvieron resultados de la búsqueda.");
+  }
+};
