@@ -513,3 +513,76 @@ body {
   color: var(--accent);
   font-weight: 600;
 }
+
+/* Google Drive Connection UI */
+.gdrive-connect-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  background-color: var(--active-bg);
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+  max-width: 480px;
+  margin: 40px auto;
+  gap: 16px;
+}
+
+.gdrive-connect-container h4 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--text);
+}
+
+.gdrive-connect-container p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.gdrive-connect-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.gdrive-connect-input:focus {
+  border-color: var(--accent);
+}
+
+.gdrive-btn {
+  background-color: var(--accent);
+  color: var(--text);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  text-decoration: none;
+}
+
+.gdrive-btn:hover {
+  opacity: 0.9;
+}
+
+.gdrive-btn.secondary {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.gdrive-btn.secondary:hover {
+  background-color: var(--border-color);
+  color: var(--text);
+}

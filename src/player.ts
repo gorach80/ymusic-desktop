@@ -2,6 +2,7 @@ import { getConfig, saveConfig } from "./services/config";
 import { listen } from "@tauri-apps/api/event";
 import { searchTracks, Track } from "./services/music";
 import { getSemanticQuery } from "./services/gemini";
+import { saveGDriveToken, getGDriveToken, clearGDriveToken, listGDriveMusic } from "./services/gdrive";
 
 // Native HTML5 Audio
 const audio = new Audio();
@@ -31,6 +32,9 @@ const resultsTitle = document.querySelector(".section-title") as HTMLHeadingElem
 
 const queueList = document.getElementById("queueList") as HTMLDivElement;
 const lyricsView = document.getElementById("lyricsView") as HTMLDivElement;
+
+const btnLibrary = document.getElementById("btnLibrary") as HTMLAnchorElement;
+const btnGDrive = document.getElementById("btnGDrive") as HTMLAnchorElement;
 
 /* Helper: Format Time */
 function formatTime(seconds: number): string {
@@ -370,6 +374,118 @@ try {
     console.warn("No se obtuvieron resultados de la búsqueda.");
   }
 };
+
+/* Google Drive Music Loading and UI Integration */
+async function loadGDriveMusic() {
+  resultsGrid.innerHTML = `<div class="grid-placeholder">Cargando música de Google Drive...</div>`;
+  resultsTitle.textContent = "Resultados de Búsqueda (Google Drive - MUSICA)";
+  
+  try {
+    const tracks = await listGDriveMusic();
+    if (tracks === null) {
+      showGDriveConnectionForm("Tu token de acceso ha expirado o es inválido. Por favor, ingresa uno nuevo para continuar.");
+      return;
+    }
+    
+    if (tracks.length === 0) {
+      resultsGrid.innerHTML = `
+        <div class="grid-placeholder">
+          No se encontraron archivos de audio en la carpeta "MUSICA".
+          <br><br>
+          <button class="gdrive-btn secondary" id="btnDisconnectGDrive">Desconectar Google Drive</button>
+        </div>
+      `;
+      document.getElementById("btnDisconnectGDrive")?.addEventListener("click", () => {
+        clearGDriveToken();
+        showGDriveConnectionForm();
+      });
+      return;
+    }
+    
+    renderResults(tracks);
+    
+    const disconnectHeader = document.createElement("div");
+    disconnectHeader.style.gridColumn = "1 / -1";
+    disconnectHeader.style.display = "flex";
+    disconnectHeader.style.justifyContent = "flex-end";
+    disconnectHeader.style.padding = "10px 0";
+    
+    const discBtn = document.createElement("button");
+    discBtn.className = "gdrive-btn secondary";
+    discBtn.style.padding = "6px 12px";
+    discBtn.style.fontSize = "0.75rem";
+    discBtn.textContent = "Desconectar Google Drive";
+    discBtn.addEventListener("click", () => {
+      clearGDriveToken();
+      showGDriveConnectionForm();
+    });
+    
+    disconnectHeader.appendChild(discBtn);
+    resultsGrid.insertBefore(disconnectHeader, resultsGrid.firstChild);
+    
+  } catch (error) {
+    resultsGrid.innerHTML = `<div class="grid-placeholder" style="color: var(--accent);">Error al cargar música de Google Drive: ${(error as Error).message}</div>`;
+  }
+}
+
+function showGDriveConnectionForm(errorMessage?: string) {
+  resultsTitle.textContent = "Conectar Google Drive";
+  resultsGrid.innerHTML = `
+    <div class="gdrive-connect-container">
+      <h4>Acceso a tu Carpeta "MUSICA"</h4>
+      <p>
+        Para reproducir archivos de audio de tu Google Drive, ingresa un Token de Acceso temporal.
+      </p>
+      ${errorMessage ? `<p style="color: var(--accent); font-weight: bold;">${errorMessage}</p>` : ""}
+      
+      <input type="password" id="gdriveTokenInput" class="gdrive-connect-input" placeholder="Pega tu Access Token de Google aquí...">
+      
+      <button class="gdrive-btn" id="btnSaveGDriveToken">Guardar y Conectar</button>
+      
+      <p style="font-size: 0.75rem; margin-top: 10px;">
+        ¿Cómo obtener un token? Puedes conseguir uno rápidamente seleccionando "Drive API v3" y autorizando la lectura en el 
+        <a href="https://developers.google.com/oauthplayground/" target="_blank" style="color: var(--accent);">Google OAuth Playground</a>.
+      </p>
+    </div>
+  `;
+  
+  document.getElementById("btnSaveGDriveToken")?.addEventListener("click", () => {
+    const input = document.getElementById("gdriveTokenInput") as HTMLInputElement;
+    const token = input.value.trim();
+    if (token) {
+      saveGDriveToken(token);
+      loadGDriveMusic();
+    } else {
+      alert("Por favor ingresa un token válido.");
+    }
+  });
+}
+
+// Navigation Listeners
+btnLibrary.addEventListener("click", (e) => {
+  e.preventDefault();
+  btnGDrive.classList.remove("active");
+  btnLibrary.classList.add("active");
+  resultsTitle.textContent = "Resultados de Búsqueda";
+  resultsGrid.innerHTML = `
+    <div class="grid-placeholder">
+      Escribe una canción o un tema de tu preferencia y presiona Enter...
+    </div>
+  `;
+});
+
+btnGDrive.addEventListener("click", (e) => {
+  e.preventDefault();
+  btnLibrary.classList.remove("active");
+  btnGDrive.classList.add("active");
+  
+  const token = getGDriveToken();
+  if (token) {
+    loadGDriveMusic();
+  } else {
+    showGDriveConnectionForm();
+  }
+});
 
 // Initialize Player on startup
 initPlayer();
