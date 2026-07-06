@@ -15,49 +15,72 @@ export function clearGDriveToken(): void {
   localStorage.removeItem(TOKEN_KEY);
 }
 
+// Paginated API fetch helper to retrieve ALL results recursively
+async function fetchAllFiles(token: string, query: string, fields: string): Promise<any[]> {
+  let allFiles: any[] = [];
+  let nextPageToken: string | null = null;
+  
+  do {
+    let url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=nextPageToken,files(${fields})&pageSize=1000`;
+    if (nextPageToken) {
+      url += `&pageToken=${nextPageToken}`;
+    }
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (response.status === 401) {
+      throw new Error("UNAUTHORIZED");
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Google API error: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    if (data.files && Array.isArray(data.files)) {
+      allFiles = allFiles.concat(data.files);
+    }
+    nextPageToken = data.nextPageToken || null;
+  } while (nextPageToken);
+  
+  return allFiles;
+}
+
 export async function listGDriveMusic(): Promise<Track[] | null> {
   const token = getGDriveToken();
   if (!token) return null;
 
   try {
-    // 1. Fetch all folders in the user's Drive to map the directory hierarchy
-    const foldersUrl = `https://www.googleapis.com/drive/v3/files?q=mimeType='application/vnd.google-apps.folder'&fields=files(id,parents)&pageSize=1000`;
-    const foldersResponse = await fetch(foldersUrl, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (foldersResponse.status === 401) {
-      clearGDriveToken();
-      return null;
+    // 1. Fetch ALL folders to map the directory hierarchy
+    const foldersQuery = "mimeType='application/vnd.google-apps.folder' and trashed=false";
+    let folders: any[];
+    
+    try {
+      folders = await fetchAllFiles(token, foldersQuery, "id,parents");
+    } catch (e: any) {
+      if (e.message === "UNAUTHORIZED") {
+        clearGDriveToken();
+        return null;
+      }
+      throw e;
     }
 
-    if (!foldersResponse.ok) {
-      throw new Error(`Failed to list folders: ${foldersResponse.statusText}`);
-    }
-
-    const foldersData = await foldersResponse.json();
     const folderParentMap = new Map<string, string>(); // childFolderId -> parentFolderId
-
-    if (foldersData.files && Array.isArray(foldersData.files)) {
-      foldersData.files.forEach((folder: any) => {
-        if (folder.parents && folder.parents.length > 0) {
-          // Store child-parent relationship
-          folderParentMap.set(folder.id, folder.parents[0]);
-        }
-      });
-    }
-
-    // 2. Fetch all audio files in the user's Drive
-    const audioUrl = `https://www.googleapis.com/drive/v3/files?q=mimeType+contains+'audio/'&fields=files(id,name,mimeType,size,parents)&pageSize=1000`;
-    const audioResponse = await fetch(audioUrl, {
-      headers: { Authorization: `Bearer ${token}` },
+    folders.forEach((folder) => {
+      if (folder.parents && folder.parents.length > 0) {
+        folderParentMap.set(folder.id, folder.parents[0]);
+      }
     });
 
-    if (!audioResponse.ok) {
-      throw new Error(`Failed to list audio files: ${audioResponse.statusText}`);
-    }
+    // 2. Fetch ALL audio files (matching mimeType or filename pattern)
+    const audioQuery = "(mimeType contains 'audio/' or name contains 'mp3' or name contains 'wav' or name contains 'm4a' or name contains 'flac') and trashed=false";
+    const audioFiles = await fetchAllFiles(token, audioQuery, "id,name,mimeType,size,parents");
 
-    const audioData = await audioResponse.json();
     const filteredTracks: Track[] = [];
 
     // Helper: recursively check if a folder ID is a descendant of the ROOT_FOLDER_ID
@@ -84,22 +107,27 @@ export async function listGDriveMusic(): Promise<Track[] | null> {
       return false;
     }
 
-    // 3. Filter audio files
-    if (audioData.files && Array.isArray(audioData.files)) {
-      audioData.files.forEach((file: any) => {
-        if (isFileInRootHierarchy(file.parents)) {
-          const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
-          const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&access_token=${token}`;
+    // 3. Filter and parse audio files
+    audioFiles.forEach((file: any) => {
+      const lowerName = file.name.toLowerCase();
+      const hasAudioExtension = lowerName.endsWith(".mp3") || 
+                                lowerName.endsWith(".wav") || 
+                                lowerName.endsWith(".m4a") || 
+                                lowerName.endsWith(".flac") || 
+                                file.mimeType.includes("audio/");
+                                
+      if (hasAudioExtension && isFileInRootHierarchy(file.parents)) {
+        const cleanTitle = file.name.replace(/\.[^/.]+$/, "");
+        const streamUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&access_token=${token}`;
 
-          filteredTracks.push({
-            id: `gdrive-${file.id}`,
-            title: cleanTitle,
-            artist: "Google Drive (MUSICA)",
-            url: streamUrl,
-          });
-        }
-      });
-    }
+        filteredTracks.push({
+          id: `gdrive-${file.id}`,
+          title: cleanTitle,
+          artist: "Google Drive (MUSICA)",
+          url: streamUrl,
+        });
+      }
+    });
 
     return filteredTracks;
 
