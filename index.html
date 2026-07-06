@@ -1,22 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <title>yMusic Desktop - Premium Player</title>
   <link rel="stylesheet" href="src/style.css">
 </head>
-<body>
-  <div class="player-card">
-    <input type="text" id="searchInput" placeholder="Buscar música..." class="search-input">
+<body class="dark">
+  <div class="app-layout">
     
-    <h3 id="trackTitle">ymusic-desktop</h3>
-    <p id="trackArtist">Reproductor Ligero</p>
-    <div class="controls">
-      <button id="playBtn">Reproducir</button>
-      <button id="muteBtn">Silenciar</button>
-    </div>
-    <input type="range" id="volumeSlider" min="0" max="100">
+    <!-- Columna 1 (Panel Izquierdo): Biblioteca y Playlists -->
+    <aside class="sidebar-panel">
+      <div class="sidebar-header">
+        <span class="logo-dot"></span>
+        <h2>yMusic</h2>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <h3>Navegación</h3>
+          <a href="#" class="nav-item active" id="btnLibrary">Mi Biblioteca</a>
+        </div>
+        
+        <div class="nav-section">
+          <h3>Playlists Sincronizadas</h3>
+          <div id="playlistsList" class="playlists-list">
+            <div class="playlist-item">Favoritos</div>
+            <div class="playlist-item">Chill Vibe</div>
+            <div class="playlist-item">Concentración</div>
+          </div>
+        </div>
+      </nav>
+    </aside>
 
-    <div id="resultsList" class="results-list"></div>
+    <!-- Columna 2 (Panel Central): Buscador, Grilla y Reproductor -->
+    <main class="main-panel">
+      <!-- Top Search -->
+      <header class="search-header">
+        <input type="text" id="searchInput" placeholder="Buscar canciones, artistas, álbumes..." class="search-input">
+      </header>
+
+      <!-- Results Grid Area -->
+      <section class="content-area">
+        <h3 class="section-title">Resultados de Búsqueda</h3>
+        <div id="resultsGrid" class="results-grid">
+          <!-- Track Cards will be dynamically injected here -->
+          <div class="grid-placeholder">Escribe tu canción favorita y presiona Enter</div>
+        </div>
+      </section>
+
+      <!-- Bottom Player Controller -->
+      <footer class="player-footer">
+        <div class="player-card">
+          <div class="track-details">
+            <div class="album-art-mini" id="albumArtDisc">
+              <div class="disc-vinyl-lines"></div>
+            </div>
+            <div class="track-text">
+              <h3 id="trackTitle">yMusic Player</h3>
+              <p id="trackArtist">Listo para reproducir</p>
+            </div>
+          </div>
+
+          <div class="playback-controls">
+            <div class="controls-row">
+              <button id="prevBtn" class="media-btn" title="Anterior">◀◀</button>
+              <button id="playBtn" class="play-btn">Reproducir</button>
+              <button id="nextBtn" class="media-btn" title="Siguiente">▶▶</button>
+            </div>
+            <div class="progress-row">
+              <span id="currentTime" class="time-label">0:00</span>
+              <input type="range" id="progressBar" min="0" max="100" value="0" class="progress-slider">
+              <span id="totalDuration" class="time-label">0:00</span>
+            </div>
+          </div>
+
+          <div class="volume-controls">
+            <button id="muteBtn" class="mute-btn">Silenciar</button>
+            <input type="range" id="volumeSlider" min="0" max="100" value="80" class="volume-slider">
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Columna 3 (Panel Derecho): Cola y Letras -->
+    <aside class="right-panel">
+      <!-- Top: Cola de Reproducción -->
+      <section class="queue-section">
+        <h3>Cola de Reproducción</h3>
+        <div id="queueList" class="queue-list">
+          <div class="queue-empty">Cola vacía</div>
+        </div>
+      </section>
+
+      <!-- Bottom: Visor de Letras -->
+      <section class="lyrics-section">
+        <h3>Letras</h3>
+        <div id="lyricsView" class="lyrics-view">
+          Las letras se cargarán al reproducir una canción...
+        </div>
+      </section>
+    </aside>
+
   </div>
+
   <script type="module" src="src/player.ts"></script>
 </body>
 </html>
