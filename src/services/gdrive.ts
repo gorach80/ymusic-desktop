@@ -3,8 +3,8 @@ import { Track } from "./music";
 const ROOT_FOLDER_ID = "16ReqHE6NXCP-gdi7joljWlRxKb4nf0v_";
 const TOKEN_KEY = "ymusic_gdrive_token";
 
-// Maps parent folder ID -> Google Drive text file ID and name for lyrics extraction
-export const gdriveLyricsMap = new Map<string, { id: string; name: string }>();
+// Maps parent folder ID -> Google Drive text or doc file info for lyrics extraction
+export const gdriveLyricsMap = new Map<string, { id: string; name: string; mimeType: string }>();
 
 export function saveGDriveToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token.trim());
@@ -83,8 +83,8 @@ export async function listGDriveMusic(): Promise<Track[] | null> {
       }
     });
 
-    // 2. Fetch ALL audio and text/lyric files
-    const queryStr = "(mimeType contains 'audio/' or mimeType = 'text/plain' or name contains 'mp3' or name contains 'wav' or name contains 'm4a' or name contains 'flac' or name contains 'txt' or name contains 'lrc') and trashed=false";
+    // 2. Fetch ALL audio, text, and Google Doc files
+    const queryStr = "(mimeType contains 'audio/' or mimeType = 'text/plain' or mimeType = 'application/vnd.google-apps.document' or name contains 'mp3' or name contains 'wav' or name contains 'm4a' or name contains 'flac' or name contains 'txt' or name contains 'lrc') and trashed=false";
     const files = await fetchAllFiles(token, queryStr, "id,name,mimeType,size,parents");
 
     const filteredTracks: Track[] = [];
@@ -113,15 +113,16 @@ export async function listGDriveMusic(): Promise<Track[] | null> {
       return false;
     }
 
-    // 3. Process files (map audio to tracks, map text to lyrics directory)
+    // 3. Process files (map audio to tracks, map text/documents to lyrics directory)
     files.forEach((file: any) => {
       const lowerName = file.name.toLowerCase();
-      const isText = lowerName.endsWith(".txt") || lowerName.endsWith(".lrc") || file.mimeType === "text/plain";
+      const isGoogleDoc = file.mimeType === "application/vnd.google-apps.document";
+      const isText = lowerName.endsWith(".txt") || lowerName.endsWith(".lrc") || file.mimeType === "text/plain" || isGoogleDoc;
       
       if (isText && isFileInRootHierarchy(file.parents)) {
         const parentId = file.parents[0];
-        // Index the text file as the lyrics provider for this subfolder
-        gdriveLyricsMap.set(parentId, { id: file.id, name: file.name });
+        // Index the text or Google Doc file as the lyrics provider for this subfolder
+        gdriveLyricsMap.set(parentId, { id: file.id, name: file.name, mimeType: file.mimeType });
       } else {
         const hasAudioExtension = lowerName.endsWith(".mp3") || 
                                   lowerName.endsWith(".wav") || 
@@ -147,19 +148,25 @@ export async function listGDriveMusic(): Promise<Track[] | null> {
     return filteredTracks;
 
   } catch (error) {
-    console.error("Error fetching audio and text files from Google Drive:", error);
+    console.error("Error fetching audio and document files from Google Drive:", error);
     throw error;
   }
 }
 
-// Fetch the text contents of a Google Drive lyrics file in a subfolder
+// Fetch the text contents of a Google Drive lyrics file (handles text downloads and Google Doc exports)
 export async function fetchGDriveLyrics(folderId: string): Promise<string | null> {
   const token = getGDriveToken();
   const info = gdriveLyricsMap.get(folderId);
   if (!token || !info) return null;
 
   try {
-    const url = `https://www.googleapis.com/drive/v3/files/${info.id}?alt=media`;
+    // If it's a Google Doc, we must call the export endpoint to convert it to plain text.
+    // Otherwise, we download it directly using alt=media.
+    const isGoogleDoc = info.mimeType === "application/vnd.google-apps.document";
+    const url = isGoogleDoc
+      ? `https://www.googleapis.com/drive/v3/files/${info.id}/export?mimeType=text/plain`
+      : `https://www.googleapis.com/drive/v3/files/${info.id}?alt=media`;
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -171,7 +178,7 @@ export async function fetchGDriveLyrics(folderId: string): Promise<string | null
       return await response.text();
     }
   } catch (e) {
-    console.error("Error fetching lyrics content from Google Drive file:", e);
+    console.error("Error fetching lyrics content from Google Drive document:", e);
   }
   return null;
 }
