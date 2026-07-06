@@ -52,3 +52,69 @@ input[type=range] {
   width: 100%;
   margin-top: 12px;
 }
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--text);
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.results-list {
+  margin-top: 16px;
+  max-height: 150px;
+  overflow-y: auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-item {
+  padding: 8px;
+  border-radius: 6px;
+  background-color: var(--bg);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+  color: var(--text);
+}
+
+.result-item:hover {
+  background-color: var(--accent);
+  color: white;
+}
+
+.result-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.result-title {
+  font-weight: bold;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-artist {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

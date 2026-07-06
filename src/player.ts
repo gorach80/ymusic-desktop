@@ -8,6 +8,8 @@ const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
 const volumeSlider = document.getElementById("volumeSlider") as HTMLInputElement;
 const trackTitle = document.getElementById("trackTitle") as HTMLHeadingElement;
 const trackArtist = document.getElementById("trackArtist") as HTMLParagraphElement;
+const searchInput = document.getElementById("searchInput") as HTMLInputElement;
+const resultsList = document.getElementById("resultsList") as HTMLDivElement;
 
 let currentTrack: Track | null = null;
 
@@ -78,11 +80,63 @@ try {
   console.warn("No se pudieron registrar los oyentes de eventos de Tauri:", error);
 }
 
+// Render search results list
+function renderResults(tracks: Track[]) {
+  resultsList.innerHTML = "";
+  tracks.forEach(track => {
+    const item = document.createElement("div");
+    item.className = "result-item";
+    
+    const info = document.createElement("div");
+    info.className = "result-info";
+    
+    const titleEl = document.createElement("span");
+    titleEl.className = "result-title";
+    titleEl.textContent = track.title;
+    
+    const artistEl = document.createElement("span");
+    artistEl.className = "result-artist";
+    artistEl.textContent = track.artist;
+    
+    info.appendChild(titleEl);
+    info.appendChild(artistEl);
+    item.appendChild(info);
+    
+    item.addEventListener("click", () => {
+      playTrack(track);
+    });
+    
+    resultsList.appendChild(item);
+  });
+}
+
+// Search input keydown listener (Enter trigger)
+searchInput.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    const query = searchInput.value.trim();
+    if (query) {
+      searchInput.disabled = true;
+      searchInput.placeholder = "Buscando...";
+      try {
+        const results = await searchTracks(query);
+        renderResults(results);
+      } catch (err) {
+        console.error("Error al buscar:", err);
+      } finally {
+        searchInput.disabled = false;
+        searchInput.placeholder = "Buscar música...";
+        searchInput.focus();
+      }
+    }
+  }
+});
+
 // Expose global search helper for dev testing
 (window as any).performSearch = async (query: string) => {
   console.log(`Buscando en Deezer: ${query}`);
   const results = await searchTracks(query);
   console.log("Resultados de búsqueda:", results);
+  renderResults(results);
   if (results.length > 0) {
     console.log(`Reproduciendo primer resultado: ${results[0].title} - ${results[0].artist}`);
     playTrack(results[0]);

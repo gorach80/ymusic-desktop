@@ -5,6 +5,8 @@
 </head>
 <body>
   <div class="player-card">
+    <input type="text" id="searchInput" placeholder="Buscar música..." class="search-input">
+    
     <h3 id="trackTitle">ymusic-desktop</h3>
     <p id="trackArtist">Reproductor Ligero</p>
     <div class="controls">
@@ -12,6 +14,8 @@
       <button id="muteBtn">Silenciar</button>
     </div>
     <input type="range" id="volumeSlider" min="0" max="100">
+
+    <div id="resultsList" class="results-list"></div>
   </div>
   <script type="module" src="src/player.ts"></script>
 </body>
