@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yMusic Desktop - Player</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="dark-theme">
+  <!-- Native HTML5 Audio Element (Hidden, controlled via JS) -->
+  <audio id="audio-element" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
+  <div class="app-container">
+    <!-- Header with controls -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-dot"></span>
+        <span class="logo-text">yMusic</span>
+      </div>
+      <button id="theme-toggle" class="icon-btn theme-btn" aria-label="Cambiar Tema">
+        <!-- Sun Icon (Light Mode) -->
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+        <!-- Moon Icon (Dark Mode) -->
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main Player Card -->
+    <main class="player-card">
+      <!-- Art Cover with premium glowing gradients -->
+      <div class="album-art-wrapper">
+        <div class="album-art-glow"></div>
+        <div class="album-art" id="album-art-disc">
+          <div class="disc-center"></div>
+          <div class="disc-vinyl-lines"></div>
+        </div>
+      </div>
+
+      <!-- Track Information -->
+      <div class="track-info">
+        <h1 id="track-title" class="track-title">SoundHelix Song 1</h1>
+        <p id="track-artist" class="track-artist">SoundHelix Official</p>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="progress-section">
+        <div class="time-container">
+          <span id="current-time" class="time-label">0:00</span>
+          <span id="total-duration" class="time-label">0:00</span>
+        </div>
+        <div class="slider-container">
+          <input type="range" id="progress-bar" class="custom-slider progress-slider" min="0" max="100" value="0">
+          <div class="slider-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Controls Section -->
+      <div class="controls-section">
+        <button id="prev-btn" class="control-btn" aria-label="Anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="19 20 9 12 19 4 19 20"></polygon>
+            <line x1="5" y1="19" x2="5" y2="5"></line>
+          </svg>
+        </button>
+
+        <button id="play-btn" class="control-btn play-btn" aria-label="Reproducir">
+          <!-- Play Icon -->
+          <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="6 3 20 12 6 21 6 3"></polygon>
+          </svg>
+          <!-- Pause Icon -->
+          <svg class="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+            <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+          </svg>
+        </button>
+
+        <button id="next-btn" class="control-btn" aria-label="Siguiente">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Volume & Speaker controls -->
+      <div class="volume-section">
+        <button id="mute-toggle" class="icon-btn volume-btn" aria-label="Silenciar">
+          <!-- Speaker High Icon -->
+          <svg class="speaker-high-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <!-- Speaker Mute Icon -->
+          <svg class="speaker-mute-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="22" y1="9" x2="16" y2="15"></line>
+            <line x1="16" y1="9" x2="22" y2="15"></line>
+          </svg>
+        </button>
+        <div class="slider-container volume-slider-container">
+          <input type="range" id="volume-bar" class="custom-slider volume-slider" min="0" max="1" step="0.01" value="0.8">
+          <div class="slider-fill" id="volume-fill"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

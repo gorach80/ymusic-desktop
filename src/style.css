@@ -1,0 +1,513 @@
+/* CSS variables for light and dark themes */
+:root {
+  --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Dark Theme Variables (default) */
+  --bg-gradient-start: #0a0a0f;
+  --bg-gradient-end: #141420;
+  --card-bg: rgba(22, 22, 38, 0.65);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(139, 92, 246, 0.15);
+  
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  
+  --accent-gradient-start: #8b5cf6;
+  --accent-gradient-end: #06b6d4;
+  --accent-color: #8b5cf6;
+  
+  --btn-bg: rgba(255, 255, 255, 0.05);
+  --btn-bg-hover: rgba(255, 255, 255, 0.1);
+  --btn-color: #f3f4f6;
+  
+  --slider-track: rgba(255, 255, 255, 0.1);
+  --slider-fill: linear-gradient(90deg, #8b5cf6, #06b6d4);
+  --slider-thumb: #ffffff;
+  --slider-thumb-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+  
+  --disc-gradient-start: #1e1b4b;
+  --disc-gradient-end: #311042;
+  --disc-center-bg: #09090b;
+}
+
+/* Light Theme Variables overrides */
+.light-theme {
+  --bg-gradient-start: #f4f5f8;
+  --bg-gradient-end: #e9ecf3;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(0, 0, 0, 0.05);
+  --card-shadow: 0 20px 40px rgba(15, 23, 42, 0.08), 0 0 50px rgba(139, 92, 246, 0.05);
+  
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  
+  --accent-gradient-start: #7c3aed;
+  --accent-gradient-end: #0891b2;
+  --accent-color: #7c3aed;
+  
+  --btn-bg: rgba(0, 0, 0, 0.04);
+  --btn-bg-hover: rgba(0, 0, 0, 0.08);
+  --btn-color: #111827;
+  
+  --slider-track: rgba(0, 0, 0, 0.08);
+  --slider-fill: linear-gradient(90deg, #7c3aed, #0891b2);
+  --slider-thumb: #7c3aed;
+  --slider-thumb-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+  
+  --disc-gradient-start: #e0e7ff;
+  --disc-gradient-end: #fae8ff;
+  --disc-center-bg: #ffffff;
+}
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: background 0.4s ease-in-out;
+}
+
+/* App container */
+.app-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* App Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+  background: linear-gradient(to right, var(--accent-gradient-start), var(--accent-gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(to right, var(--accent-gradient-start), var(--accent-gradient-end));
+  display: inline-block;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.icon-btn {
+  background: var(--btn-bg);
+  border: 1px solid var(--card-border);
+  color: var(--btn-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.icon-btn:hover {
+  background: var(--btn-bg-hover);
+  transform: translateY(-2px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+}
+
+/* Theme Toggle Icons */
+.sun-icon, .moon-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.dark-theme .sun-icon {
+  display: block;
+}
+.dark-theme .moon-icon {
+  display: none;
+}
+.light-theme .sun-icon {
+  display: none;
+}
+.light-theme .moon-icon {
+  display: block;
+}
+
+/* Music Player Card */
+.player-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 32px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: var(--card-shadow);
+  transition: all 0.4s ease;
+}
+
+/* Cover / Vinyl Disc Section */
+.album-art-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 28px;
+}
+
+.album-art-glow {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
+  filter: blur(25px);
+  opacity: 0.4;
+  z-index: 1;
+  transition: opacity 0.5s ease;
+}
+
+.album-art {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--disc-gradient-start) 0%, var(--disc-gradient-end) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  cursor: pointer;
+  border: 4px solid var(--card-border);
+}
+
+.disc-vinyl-lines {
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.disc-vinyl-lines::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.disc-center {
+  width: 48px;
+  height: 48px;
+  background: var(--disc-center-bg);
+  border-radius: 50%;
+  border: 4px solid var(--card-border);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.disc-center::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: var(--accent-color);
+  border-radius: 50%;
+}
+
+/* Spin animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.playing .album-art {
+  animation: spin 15s linear infinite;
+}
+
+.playing .album-art-glow {
+  opacity: 0.7;
+}
+
+/* Track Info */
+.track-info {
+  text-align: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.track-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-artist {
+  font-size: 0.925rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Progress Section */
+.progress-section {
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.time-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.time-label {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Sliders */
+.slider-container {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.custom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  background: var(--slider-track);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  position: absolute;
+  z-index: 2;
+}
+
+.slider-fill {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  background: var(--slider-fill);
+  border-radius: 2px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Slider Thumbs custom styling */
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  box-shadow: var(--slider-thumb-shadow);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.custom-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+.custom-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  box-shadow: var(--slider-thumb-shadow);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.custom-slider:hover::-moz-range-thumb {
+  transform: scale(1.3);
+}
+
+/* Playback Controls Section */
+.controls-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 28px;
+}
+
+.control-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.control-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.control-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.08);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+/* Play/Pause Button */
+.play-btn {
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
+  color: #ffffff;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-btn svg {
+  width: 28px;
+  height: 28px;
+  margin-left: 2px; /* optical center adjustment for play arrow */
+  transition: transform 0.2s ease;
+}
+
+.play-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.4), 0 0 30px rgba(6, 182, 212, 0.2);
+  color: #ffffff;
+}
+
+.play-btn:active {
+  transform: scale(0.95);
+}
+
+.pause-icon {
+  display: none;
+}
+
+.playing .play-icon {
+  display: none;
+}
+
+.playing .pause-icon {
+  display: block;
+  margin-left: 0 !important; /* reset optical center alignment */
+}
+
+/* Volume controls section */
+.volume-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--card-border);
+}
+
+.volume-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.volume-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.volume-btn:hover {
+  background: var(--btn-bg);
+  color: var(--text-primary);
+}
+
+/* Volume Slider tweaks */
+.volume-slider-container {
+  flex: 1;
+}
+
+/* Mute toggle icon state */
+.speaker-mute-icon {
+  display: none;
+}
+
+.muted .speaker-high-icon {
+  display: none;
+}
+
+.muted .speaker-mute-icon {
+  display: block;
+}
+
+.muted .volume-slider {
+  opacity: 0.5;
+}
+
+.muted .slider-fill {
+  background: var(--text-muted);
+}
