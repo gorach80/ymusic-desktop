@@ -5,6 +5,7 @@ export interface Track {
   title: string;
   artist: string;
   url: string;
+  folderId?: string;
 }
 
 export async function searchTracks(query: string): Promise<Track[]> {

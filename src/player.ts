@@ -2,7 +2,7 @@ import { getConfig, saveConfig } from "./services/config";
 import { listen } from "@tauri-apps/api/event";
 import { searchTracks, Track } from "./services/music";
 import { getSemanticQuery } from "./services/gemini";
-import { saveGDriveToken, getGDriveToken, clearGDriveToken, listGDriveMusic } from "./services/gdrive";
+import { saveGDriveToken, getGDriveToken, clearGDriveToken, listGDriveMusic, fetchGDriveLyrics } from "./services/gdrive";
 
 // Native HTML5 Audio
 const audio = new Audio();
@@ -150,10 +150,32 @@ function playQueueTrack(index: number) {
   loadLyricsAsync(track);
 }
 
-/* Lyrics Loader Engine (Async Mock) */
+/* Lyrics Loader Engine (Async Mock + Google Drive text file support) */
 async function loadLyricsAsync(track: Track) {
-  lyricsView.innerHTML = `<div class="lyrics-line">Cargando letras asíncronamente...</div>`;
+  lyricsView.innerHTML = `<div class="lyrics-line">Cargando letras...</div>`;
   
+  if (track.id.startsWith("gdrive-") && track.folderId) {
+    try {
+      const gdriveLyrics = await fetchGDriveLyrics(track.folderId);
+      if (gdriveLyrics) {
+        lyricsView.innerHTML = "";
+        const lines = gdriveLyrics.split(/\r?\n/);
+        lines.forEach((line) => {
+          const trimmed = line.trim();
+          if (trimmed) {
+            const p = document.createElement("p");
+            p.className = "lyrics-line";
+            p.textContent = trimmed;
+            lyricsView.appendChild(p);
+          }
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn("No se pudo cargar la letra desde el archivo de Google Drive:", e);
+    }
+  }
+
   // Simulate network request to lyrics provider
   setTimeout(() => {
     const mockLyrics = [
