@@ -1,4 +1,5 @@
 import { getConfig, saveConfig } from "./services/config";
+import { listen } from "@tauri-apps/api/event";
 
 const audio = new Audio();
 const playBtn = document.getElementById("playBtn") as HTMLButtonElement;
@@ -49,3 +50,15 @@ muteBtn.addEventListener("click", async () => {
 });
 
 initPlayer();
+
+// Listen to global shortcuts from Rust
+try {
+  listen("shortcut-play-pause", () => {
+    playBtn.click();
+  });
+  listen("shortcut-mute", () => {
+    muteBtn.click();
+  });
+} catch (error) {
+  console.warn("No se pudieron registrar los oyentes de eventos de Tauri:", error);
+}
